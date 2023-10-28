@@ -15,6 +15,7 @@
  */
 package com.google.firebase.codelab.friendlychat
 
+import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
 import android.view.Menu
@@ -22,31 +23,46 @@ import android.view.MenuItem
 import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.firebase.ui.auth.AuthUI
-import com.firebase.ui.auth.AuthUI.IdpConfig.*
-import com.google.firebase.codelab.friendlychat.BuildConfig
+import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.auth.ktx.auth
 import com.google.firebase.codelab.friendlychat.databinding.ActivityMainBinding
+import com.google.firebase.database.ktx.database
+import com.google.firebase.ktx.Firebase
+import com.google.firebase.storage.BuildConfig
 import com.google.firebase.storage.StorageReference
+import com.google.firebase.storage.ktx.storage
 
 class MainActivity : AppCompatActivity() {
     private lateinit var binding: ActivityMainBinding
     private lateinit var manager: LinearLayoutManager
 
+
     private val openDocument = registerForActivityResult(MyOpenDocumentContract()) { uri ->
         uri?.let { onImageSelected(it) }
     }
 
-    // TODO: implement Firebase instance variables
+    private lateinit var auth: FirebaseAuth
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-
+        if (BuildConfig.DEBUG) {
+            Firebase.database.useEmulator("10.0.2.2", 9000)
+            Firebase.auth.useEmulator("10.0.2.2", 9099)
+            Firebase.storage.useEmulator("10.0.2.2", 9199)
+        }
         // This codelab uses View Binding
         // See: https://developer.android.com/topic/libraries/view-binding
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
         // Initialize Firebase Auth and check if the user is signed in
-        // TODO: implement
+        auth = Firebase.auth
+        if(auth.currentUser == null) {
+            startActivity(Intent(this, SignInActivity::class.java))
+            finish()
+            // finish the on create because this will start a new activity
+            return
+        }
 
         // Initialize Realtime Database and FirebaseRecyclerAdapter
         // TODO: implement
@@ -104,7 +120,19 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun signOut() {
-        // TODO: implement
+        AuthUI.getInstance().signOut(this)
+        startActivity(Intent(this, SignInActivity::class.java))
+        finish()
+    }
+
+    private fun getPhotoUrl(): String? {
+        val user = auth.currentUser
+        return user?.photoUrl?.toString()
+    }
+
+    private fun getUserName(): String? {
+        val user = auth.currentUser
+        return user?.displayName ?: ANONYMOUS
     }
 
     companion object {
