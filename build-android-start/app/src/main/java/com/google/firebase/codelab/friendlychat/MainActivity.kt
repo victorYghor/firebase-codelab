@@ -53,6 +53,7 @@ class MainActivity : AppCompatActivity() {
     private lateinit var auth: FirebaseAuth
     private lateinit var db: FirebaseDatabase
     private lateinit var adapter: FriendlyMessageAdapter
+    private var user:  FirebaseUser? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -64,7 +65,8 @@ class MainActivity : AppCompatActivity() {
         // Initialize Firebase Auth and check if the user is signed in
         auth = Firebase.auth
 
-        if(auth.currentUser == null) {
+        user = auth.currentUser
+        if(user == null) {
             startActivity(Intent(this, SignInActivity::class.java))
             finish()
             // finish the on create because this will start a new activity
@@ -113,7 +115,6 @@ class MainActivity : AppCompatActivity() {
     public override fun onStart() {
         super.onStart()
         // Check if user is signed in.
-        val user = auth.currentUser
         if(user == null) {
             startActivity(Intent(this, SignInActivity::class.java))
             finish()
@@ -151,7 +152,6 @@ class MainActivity : AppCompatActivity() {
     private fun onImageSelected(uri: Uri) {
         Log.d(TAG, "uri:$uri")
         val tempMessage = FriendlyMessage(null, getUserName(), getPhotoUrl(), LOADING_IMAGE_URL)
-        val user = auth.currentUser
         db.reference.child(MESSAGES_CHILD).push()
             .setValue(tempMessage, DatabaseReference.CompletionListener { error: DatabaseError?, ref: DatabaseReference ->
                 if (error == null) {
@@ -192,12 +192,10 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun getPhotoUrl(): String? {
-        val user = auth.currentUser
         return user?.photoUrl?.toString()
     }
 
     private fun getUserName(): String? {
-        val user = auth.currentUser
         return user?.displayName ?: ANONYMOUS
     }
 

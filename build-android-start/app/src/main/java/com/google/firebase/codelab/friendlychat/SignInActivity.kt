@@ -56,6 +56,7 @@ class SignInActivity : AppCompatActivity() {
 
     public override fun onStart() {
         super.onStart()
+        Log.d("Reach", "SignInActivity")
         if(Firebase.auth.currentUser == null) {
             // creating the signInIntent, putting the logo, the providers and build
             val signInIntent = AuthUI.getInstance()
@@ -65,6 +66,7 @@ class SignInActivity : AppCompatActivity() {
                     AuthUI.IdpConfig.EmailBuilder().build(),
                     AuthUI.IdpConfig.GoogleBuilder().build(),
                 )).build()
+            // I don't understand this
             signIn.launch(signInIntent)
         } else {
             goToMainActivity()

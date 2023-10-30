@@ -35,6 +35,7 @@ import com.google.firebase.storage.ktx.storage
 
 // The FirebaseRecyclerAdapter class and options come from the FirebaseUI library
 // See: https://github.com/firebase/FirebaseUI-Android
+// data binding
 class FriendlyMessageAdapter(
     private val options: FirebaseRecyclerOptions<FriendlyMessage>,
     private val currentUserName: String?
@@ -67,7 +68,17 @@ class FriendlyMessageAdapter(
 
     inner class MessageViewHolder(private val binding: MessageBinding) : ViewHolder(binding.root) {
         fun bind(item: FriendlyMessage) {
-            // TODO: implement
+            binding.messageTextView.text = item.text
+            setTextColor(item.name, binding.messageTextView)
+
+            binding.messengerTextView.text = item.name ?: ANONYMOUS
+
+            // putting the photo image on the url
+            if (item.photoUrl != null) {
+                loadImageIntoView(binding.messengerImageView, item.photoUrl!!)
+            } else {
+                binding.messengerImageView.setImageResource(R.drawable.ic_account_circle_black_36dp)
+            }
         }
 
         private fun setTextColor(userName: String?, textView: TextView) {
@@ -84,7 +95,15 @@ class FriendlyMessageAdapter(
     inner class ImageMessageViewHolder(private val binding: ImageMessageBinding) :
         ViewHolder(binding.root) {
         fun bind(item: FriendlyMessage) {
-            // TODO: implement
+            // putting the image
+            loadImageIntoView(binding.messageImageView, item.imageUrl!!, false)
+            binding.messengerTextView.text = item.name ?: ANONYMOUS
+            // dealing with the image of the profile
+            if(item.photoUrl != null) {
+                loadImageIntoView(binding.messageImageView, item.photoUrl)
+            } else {
+                binding.messengerImageView.setImageResource(R.drawable.ic_account_circle_black_36dp)
+            }
         }
     }
 
